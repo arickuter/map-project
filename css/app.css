@@ -10,26 +10,56 @@ html, body {
 #map {
   bottom: 0px;
   height: 100%;
-  left: 20%;
-  top: 9%;
+  left: 300px;
+  top: 60px;
   position: absolute;
   right: 0px;
-  border-radius: 10px;
+}
+
+span {
+  font-size: 30px;
+  font-weight: bold;
+  margin-left: 17px;
+  padding-right: 40px;
+  padding-top: 40px;
+  position: relative;
+  top: 13px;
+}
+
+#menuIcon {
+  top: 56px;
+  left: 4px;
+  position: relative;
+  z-index: 99999;
+  background: black;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+#menuIcon:hover {
+  background: white;
+  color: black;
+}
+
+#menu {
+  padding-left: 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  padding-top: 25px;
 }
 
 #filter {
-  width: 20%;
-  padding-left: 10px;
+  padding-bottom: 10px;
 }
 
-button {
+#filterBtn {
   background: #4286f4;
   height: 25px;
   border: none;
   color: white;
   border-top-right-radius: 5px;
   border-bottom-right-radius: 5px;
-  cursor: pointer;
 }
 
 i {
@@ -37,7 +67,7 @@ i {
 }
 
 li {
-  padding-bottom: 10px;
+  padding-bottom: 20px;
 }
 
 li:hover {
@@ -46,7 +76,7 @@ li:hover {
 
 input {
   height: 20px;
-  width: 70%;
+  width: 200px;
   border-width: 2px;
   border-color: #4286f4;
   border-right: 0;
@@ -54,6 +84,7 @@ input {
   border-style: solid;
   border-bottom-width: 1px;
   outline-width: 0;
+  margin-left: 8px;
 }
 
 #locations {

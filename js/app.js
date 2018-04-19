@@ -2,6 +2,7 @@ var model = {
   map: null,
   markers: [],
   lastWindow: null,
+  lastMarker: null,
   messages: ['Big area with squash courts, fields, cricket nets and a baseball field',
     'A nice market to go to with a wide variety of food and good prices', 'A convenient little shop',
     'Small skate park with some cool ramps', 'A good school for kids'
@@ -113,21 +114,51 @@ var viewModel = {
     return model.messages[messageId];
   },
 
-  callback: function(message, marker) {
+  addPic: function(searchStr) {
+    var locationArr = viewModel.getLocations();
+    for (var i = 0; i < locationArr.length; i++) {
+      if (locationArr[i].title == searchStr) {
+        viewModel.getMap().panTo(viewModel.getMarkers()[i].getPosition());
+        viewModel.getMarkers()[i].setAnimation(google.maps.Animation.BOUNCE);
+        fetch(`https://api.unsplash.com/search/photos?page=1&query=${searchStr}`, {
+          headers: {
+            Authorization: 'Client-ID 1cf8a6d4be936f77a3cf9ee18f25bb48c9c868a6a67f8bdb0d5c6f1530c519a1'
+          }
+        }).then(function(response) {
+          return response.json();
+        }).then(function(data) {
+          var htmlContent = '';
+          var firstImage = data.results[0];
 
+          if (firstImage) {
+            htmlContent = `<figure>
+          <img src="${firstImage.urls.small}" alt="${searchStr}">
+          <figcaption>${searchStr} by ${firstImage.user.name}</figcaption>
+          </figure>`;
+          } else {
+            htmlContent = 'Unfortunately, no image was returned for your search.'
+          }
+          viewModel.openInfo(viewModel.getMessage(i), viewModel.getMarkers()[i], htmlContent);
+        });
+        break;
+      }
+    }
   },
 
-  openInfo: function(message, marker) {
+  openInfo: function(message, marker, unsplash) {
     if (model.lastWindow) {
       model.lastWindow.close();
+      model.lastMarker.setAnimation(google.maps.Animation.NONE);
+
     }
     var infoWindow = new google.maps.InfoWindow({
-      content: marker.title.bold() + '<br>' + message,
+      content: marker.title.bold() + '<br>' + message + unsplash
     });
 
     infoWindow.open(model.map, marker);
     model.lastWindow = infoWindow;
-  }
+    model.lastMarker = marker;
+  },
 };
 
 var mapView = {
@@ -160,8 +191,8 @@ var mapView = {
 
       // Add event listener that when clicked, map is centered at the marker and infoWindow is shown
       marker.addListener('click', function() {
-        viewModel.getMap().panTo(this.getPosition());
-        viewModel.openInfo(viewModel.getMessage(this.id), this);
+        searchStr = this.title;
+        viewModel.addPic(searchStr);
       });
 
     }
@@ -183,13 +214,33 @@ var filterView = {
     for (i = 0; i < viewModel.getLocations().length; i++) {
       document.getElementById("locations").innerHTML += viewModel.populateLocations(i);
     }
+
+    $('#menuIcon').on('click', function() {
+      if (document.getElementById('menu').style.visibility !== 'hidden') {
+        document.getElementById('menu').style.visibility = 'hidden';
+        document.getElementById('map').style.left = '50px';
+        this.style.left = '-246px';
+      } else {
+        document.getElementById('menu').style.visibility = '';
+        document.getElementById('map').style.left = '300px';
+        this.style.left = '4px';
+      }
+    });
+
     $('ul').on('click', function(e) {
+      viewModel.addPic(e.target.innerHTML);
+    });
+
+    $('#searchField').keyup(function() {
+      var searchStr = document.getElementById('searchField').value;
       var locationArr = viewModel.getLocations();
       for (var i = 0; i < locationArr.length; i++) {
-        if (locationArr[i].title == e.target.innerHTML) {
-          viewModel.getMap().panTo(viewModel.getMarkers()[i].getPosition());
-          viewModel.openInfo(viewModel.getMessage(i), viewModel.getMarkers()[i]);
-          break;
+        if (locationArr[i].title.toUpperCase().includes(searchStr.toUpperCase()) == true) {
+          document.getElementById("locations").children[i].style.display = "";
+          viewModel.getMarkers()[i].setVisible(true);
+        } else {
+          document.getElementById("locations").children[i].style.display = "none";
+          viewModel.getMarkers()[i].setVisible(false);
         }
       }
     });
