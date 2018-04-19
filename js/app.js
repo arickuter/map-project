@@ -1,20 +1,24 @@
 var model = {
   map: null,
   markers: [],
+  messages: ['Big area with squash courts, fields, cricket nets and a baseball field',
+    'A nice market to go to with a wide variety of food and good prices', 'A convenient little shop',
+    'Small skate park with some cool ramps', 'A good school for kids'
+  ],
 
   locations: [{
       title: 'Radloff Park',
       location: {
         lat: -34.079939,
         lng: 18.870788
-      }
+      },
     },
     {
       title: 'Lourensford Market',
       location: {
         lat: -34.067609,
         lng: 18.893209
-      }
+      },
     },
     {
       title: 'Shell Garage Shop',
@@ -97,6 +101,17 @@ var viewModel = {
 
   addMarker: function(marker) {
     model.markers.push(marker);
+  },
+
+  getMessage: function(messageId) {
+    return model.messages[messageId];
+  },
+
+  openInfo: function(message, marker) {
+    var infoWindow = new google.maps.InfoWindow({
+      content: marker.title.bold() + '<br>' + message,
+    });
+    infoWindow.open(model.map, marker);
   }
 };
 
@@ -105,7 +120,7 @@ var mapView = {
     var map = new google.maps.Map(document.getElementById('map'), {
       center: {
         lat: -34.071912,
-        lng: 18.876036
+        lng: 18.879996
       },
       zoom: 15.5,
       mapTypeControl: false
@@ -127,6 +142,13 @@ var mapView = {
         id: i,
       });
       viewModel.addMarker(marker);
+
+      // Add event listener that when clicked, map is centered at the marker and infoWindow is shown
+      marker.addListener('click', function() {
+        viewModel.getMap().panTo(this.getPosition());
+        viewModel.openInfo(viewModel.getMessage(this.id), this);
+      });
+
     }
   },
 
