@@ -3,11 +3,14 @@ var model = {
   markers: [],
   lastWindow: null,
   lastMarker: null,
+
+  // Array of text that will displayed in infoWindow
   messages: ['Big area with squash courts, fields, cricket nets and a baseball field',
     'A nice market to go to with a wide variety of food and good prices', 'A convenient little shop',
     'Small skate park with some cool ramps', 'A good school for kids'
   ],
 
+  // Array of markers
   locations: [{
       title: 'Radloff Park',
       location: {
@@ -44,6 +47,8 @@ var model = {
       }
     }
   ],
+
+  //Style object for map
   styles: {
     hide: [{
         "featureType": "poi",
@@ -75,45 +80,56 @@ var model = {
   }
 };
 
+// viewModel part of MVVM
 var viewModel = {
+  // Initialize all views
   init: function() {
     mapView.init();
     mapView.initMarkers();
     filterView.initList();
   },
 
+  // Adds all the locations to the map
   populateLocations: function(locationId) {
     return `<li id="loc${locationId}">` + model.locations[locationId].title + '</li>';
   },
 
+  // Returns the array locations
   getLocations: function() {
     return model.locations;
   },
 
+  // Returns the map
   getMap: function() {
     return model.map;
   },
 
+  // Returns the array of markers
   getMarkers: function() {
     return model.markers;
   },
 
+  // Returns the styles object for the map
   getStyles: function() {
     return model.styles;
   },
 
+  // Sets the map object to a map
   setMap: function(map) {
     model.map = map;
   },
 
+  // Adds the markers to the marker array
   addMarker: function(marker) {
     model.markers.push(marker);
   },
 
+  // Returns the message from array
   getMessage: function(messageId) {
     return model.messages[messageId];
   },
 
+  // Adds a picture to infoWindow of clicked marker
   addPic: function(searchStr) {
     var locationArr = viewModel.getLocations();
     for (var i = 0; i < locationArr.length; i++) {
@@ -145,23 +161,28 @@ var viewModel = {
     }
   },
 
+  // Opens the infoWindow at the marker
   openInfo: function(message, marker, unsplash) {
     if (model.lastWindow) {
       model.lastWindow.close();
       model.lastMarker.setAnimation(google.maps.Animation.NONE);
 
     }
+    // Creates new infoWindow
     var infoWindow = new google.maps.InfoWindow({
       content: marker.title.bold() + '<br>' + message + unsplash
     });
 
+    // Opens new infoWindow
     infoWindow.open(model.map, marker);
     model.lastWindow = infoWindow;
     model.lastMarker = marker;
   },
 };
 
+// One view part of the MVVM
 var mapView = {
+  // Initialize map and style it. Adds markers to the map and event listeners to them
   init: function() {
     var map = new google.maps.Map(document.getElementById('map'), {
       center: {
@@ -172,12 +193,15 @@ var mapView = {
       mapTypeControl: false
     });
 
+    // Sets the map object to the created map
     viewModel.setMap(map);
 
+    // Style the map
     viewModel.getMap().setOptions({
       styles: viewModel.getStyles().hide
     });
 
+    // Creates adds markers to array of markers
     for (var i = 0; i < viewModel.getLocations().length; i++) {
       var position = viewModel.getLocations()[i].location;
       var title = viewModel.getLocations()[i].title;
@@ -198,23 +222,28 @@ var mapView = {
     }
   },
 
+  // Puts the markers on the map
   initMarkers: function() {
     for (var i = 0; i < viewModel.getMarkers().length; i++) {
       viewModel.getMarkers()[i].setMap(viewModel.getMap());
     }
   },
 
+  // Returns error if map can't load
   mapError: function() {
     alert('There was an error loading the map!');
   }
 };
 
+// Another view part of MVVM
 var filterView = {
+  // Initializes the list of locations
   initList: function() {
     for (i = 0; i < viewModel.getLocations().length; i++) {
       document.getElementById("locations").innerHTML += viewModel.populateLocations(i);
     }
 
+    // Adds event listener to menu icon so when clicked it moves and shows/hides the menu
     $('#menuIcon').on('click', function() {
       if (document.getElementById('menu').style.visibility !== 'hidden') {
         document.getElementById('menu').style.visibility = 'hidden';
@@ -227,10 +256,12 @@ var filterView = {
       }
     });
 
+    // Adds picture to infoWindow
     $('ul').on('click', function(e) {
       viewModel.addPic(e.target.innerHTML);
     });
 
+    // Filter functionality, hides items if no match to text, reshows if the search is found
     $('#searchField').keyup(function() {
       var searchStr = document.getElementById('searchField').value;
       var locationArr = viewModel.getLocations();
