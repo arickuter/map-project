@@ -1,6 +1,7 @@
 var model = {
   map: null,
   markers: [],
+  lastWindow: null,
   messages: ['Big area with squash courts, fields, cricket nets and a baseball field',
     'A nice market to go to with a wide variety of food and good prices', 'A convenient little shop',
     'Small skate park with some cool ramps', 'A good school for kids'
@@ -77,6 +78,11 @@ var viewModel = {
   init: function() {
     mapView.init();
     mapView.initMarkers();
+    filterView.initList();
+  },
+
+  populateLocations: function(locationId) {
+    return `<li id="loc${locationId}">` + model.locations[locationId].title + '</li>';
   },
 
   getLocations: function() {
@@ -107,11 +113,20 @@ var viewModel = {
     return model.messages[messageId];
   },
 
+  callback: function(message, marker) {
+
+  },
+
   openInfo: function(message, marker) {
+    if (model.lastWindow) {
+      model.lastWindow.close();
+    }
     var infoWindow = new google.maps.InfoWindow({
       content: marker.title.bold() + '<br>' + message,
     });
+
     infoWindow.open(model.map, marker);
+    model.lastWindow = infoWindow;
   }
 };
 
@@ -160,5 +175,23 @@ var mapView = {
 
   mapError: function() {
     alert('There was an error loading the map!');
+  }
+};
+
+var filterView = {
+  initList: function() {
+    for (i = 0; i < viewModel.getLocations().length; i++) {
+      document.getElementById("locations").innerHTML += viewModel.populateLocations(i);
+    }
+    $('ul').on('click', function(e) {
+      var locationArr = viewModel.getLocations();
+      for (var i = 0; i < locationArr.length; i++) {
+        if (locationArr[i].title == e.target.innerHTML) {
+          viewModel.getMap().panTo(viewModel.getMarkers()[i].getPosition());
+          viewModel.openInfo(viewModel.getMessage(i), viewModel.getMarkers()[i]);
+          break;
+        }
+      }
+    });
   }
 };

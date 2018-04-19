@@ -1,20 +1,64 @@
-html,
-body {
+html, body {
   font-family: Arial, sans-serif;
   height: 100%;
   margin: 0;
   padding: 0;
+  background: black;
+  color: grey;
 }
 
 #map {
-  bottom:0px;
+  bottom: 0px;
   height: 100%;
-  left: 362px;
+  left: 20%;
+  top: 9%;
   position: absolute;
   right: 0px;
+  border-radius: 10px;
 }
 
 #filter {
-  width: 362px;
-  background: blue;
+  width: 20%;
+  padding-left: 10px;
+}
+
+button {
+  background: #4286f4;
+  height: 25px;
+  border: none;
+  color: white;
+  border-top-right-radius: 5px;
+  border-bottom-right-radius: 5px;
+  cursor: pointer;
+}
+
+i {
+  padding-right: 2px;
+}
+
+li {
+  padding-bottom: 10px;
+}
+
+li:hover {
+  color: white;
+}
+
+input {
+  height: 20px;
+  width: 70%;
+  border-width: 2px;
+  border-color: #4286f4;
+  border-right: 0;
+  margin-right: -7px;
+  border-style: solid;
+  border-bottom-width: 1px;
+  outline-width: 0;
+}
+
+#locations {
+  list-style-type: none;
+  padding: 0;
+  padding-left: 8px;
+  cursor: pointer;
 }
