@@ -16,7 +16,7 @@ html, body {
   right: 0px;
 }
 
-span {
+#title {
   font-size: 30px;
   font-weight: bold;
   margin-left: 17px;

@@ -10,7 +10,7 @@ var model = {
     'Small skate park with some cool ramps', 'A good school for kids'
   ],
 
-  // Array of markers
+  // Array of location objects
   locations: [{
       title: 'Radloff Park',
       location: {
@@ -89,7 +89,7 @@ var viewModel = {
     filterView.initList();
   },
 
-  // Adds all the locations to the map
+  // Adds a location to the map
   populateLocations: function(locationId) {
     return `<li id="loc${locationId}">` + model.locations[locationId].title + '</li>';
   },
@@ -145,7 +145,7 @@ var viewModel = {
         }).then(function(data) {
           var htmlContent = '';
           var firstImage = data.results[0];
-
+          // Constructs html to add the picture
           if (firstImage) {
             htmlContent = `<figure>
           <img src="${firstImage.urls.small}" alt="${searchStr}">
@@ -161,13 +161,13 @@ var viewModel = {
     }
   },
 
-  // Opens the infoWindow at the marker
   openInfo: function(message, marker, unsplash) {
     if (model.lastWindow) {
+      // Closes the open infoWindow
       model.lastWindow.close();
       model.lastMarker.setAnimation(google.maps.Animation.NONE);
-
     }
+
     // Creates new infoWindow
     var infoWindow = new google.maps.InfoWindow({
       content: marker.title.bold() + '<br>' + message + unsplash
@@ -201,7 +201,7 @@ var mapView = {
       styles: viewModel.getStyles().hide
     });
 
-    // Creates adds markers to array of markers
+    // Creates and adds markers to array of markers
     for (var i = 0; i < viewModel.getLocations().length; i++) {
       var position = viewModel.getLocations()[i].location;
       var title = viewModel.getLocations()[i].title;
