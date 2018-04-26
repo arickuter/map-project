@@ -89,6 +89,13 @@ var viewModel = {
     filterView.initList();
   },
 
+  handleErrors: function(response) {
+    if (!response.ok) {
+      throw Error(response.statusText);
+    }
+    return response;
+  },
+
   // Adds a location to the map
   populateLocations: function(locationId) {
     return `<li id="loc${locationId}">` + model.locations[locationId].title + '</li>';
@@ -137,25 +144,28 @@ var viewModel = {
         viewModel.getMap().panTo(viewModel.getMarkers()[i].getPosition());
         viewModel.getMarkers()[i].setAnimation(google.maps.Animation.BOUNCE);
         fetch(`https://api.unsplash.com/search/photos?page=1&query=${searchStr}`, {
-          headers: {
-            Authorization: 'Client-ID 1cf8a6d4be936f77a3cf9ee18f25bb48c9c868a6a67f8bdb0d5c6f1530c519a1'
-          }
-        }).then(function(response) {
-          return response.json();
-        }).then(function(data) {
-          var htmlContent = '';
-          var firstImage = data.results[0];
-          // Constructs html to add the picture
-          if (firstImage) {
-            htmlContent = `<figure>
+            headers: {
+              Authorization: 'Client-ID 1cf8a6d4be936f77a3cf9ee18f25bb48c9c868a6a67f8bdb0d5c6f1530c519a1'
+            }
+          }).then(viewModel.handleErrors)
+          .then(function(response) {
+            return response.json();
+          }).then(function(data) {
+            var htmlContent = '';
+            var firstImage = data.results[0];
+            // Constructs html to add the picture
+            if (firstImage) {
+              htmlContent = `<figure>
           <img src="${firstImage.urls.small}" alt="${searchStr}">
           <figcaption>${searchStr} by ${firstImage.user.name}</figcaption>
           </figure>`;
-          } else {
-            htmlContent = 'Unfortunately, no image was returned for your search.'
-          }
-          viewModel.openInfo(viewModel.getMessage(i), viewModel.getMarkers()[i], htmlContent);
-        });
+            } else {
+              htmlContent = 'Unfortunately, no image was returned for your search.'
+            }
+            viewModel.openInfo(viewModel.getMessage(i), viewModel.getMarkers()[i], htmlContent);
+          }).catch(function(error) {
+            console.log(error);
+          });
         break;
       }
     }
