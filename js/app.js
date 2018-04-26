@@ -1,8 +1,48 @@
+// Global array of locations
+var locationList = [{
+    title: 'Radloff Park',
+    location: {
+      lat: -34.079939,
+      lng: 18.870788
+    },
+  },
+  {
+    title: 'Lourensford Market',
+    location: {
+      lat: -34.067609,
+      lng: 18.893209
+    },
+  },
+  {
+    title: 'Shell Garage Shop',
+    location: {
+      lat: -34.078280,
+      lng: 18.869439
+    }
+  },
+  {
+    title: 'Skate Park',
+    location: {
+      lat: -34.078749,
+      lng: 18.869662
+    }
+  },
+  {
+    title: 'Newberry House Montessori School',
+    location: {
+      lat: -34.063625,
+      lng: 18.886529
+    }
+  }
+];
+
+// Model part of MVVM
 var model = {
   map: null,
   markers: [],
   lastWindow: null,
   lastMarker: null,
+  query: ko.observable(''),
 
   // Array of text that will displayed in infoWindow
   messages: ['Big area with squash courts, fields, cricket nets and a baseball field',
@@ -11,42 +51,7 @@ var model = {
   ],
 
   // Array of location objects
-  locations: [{
-      title: 'Radloff Park',
-      location: {
-        lat: -34.079939,
-        lng: 18.870788
-      },
-    },
-    {
-      title: 'Lourensford Market',
-      location: {
-        lat: -34.067609,
-        lng: 18.893209
-      },
-    },
-    {
-      title: 'Shell Garage Shop',
-      location: {
-        lat: -34.078280,
-        lng: 18.869439
-      }
-    },
-    {
-      title: 'Skate Park',
-      location: {
-        lat: -34.078749,
-        lng: 18.869662
-      }
-    },
-    {
-      title: 'Newberry House Montessori School',
-      location: {
-        lat: -34.063625,
-        lng: 18.886529
-      }
-    }
-  ],
+  locations: ko.observableArray(locationList),
 
   //Style object for map
   styles: {
@@ -89,6 +94,18 @@ var viewModel = {
     filterView.initList();
   },
 
+  // Displays items that match the search criteria
+  search: function(value) {
+    // remove all the current beers, which removes them from the view
+    model.locations([]);
+    for (var i = 0; i < locationList.length; i++) {
+      if (locationList[i].title.toLowerCase().indexOf(value.toLowerCase()) >= 0) {
+        model.locations.push(locationList[i]);
+      }
+    }
+  },
+
+  // If the response from the fetch function is not ok then it throws the error
   handleErrors: function(response) {
     if (!response.ok) {
       throw Error(response.statusText);
@@ -96,14 +113,9 @@ var viewModel = {
     return response;
   },
 
-  // Adds a location to the map
-  populateLocations: function(locationId) {
-    return `<li id="loc${locationId}">` + model.locations[locationId].title + '</li>';
-  },
-
   // Returns the array locations
   getLocations: function() {
-    return model.locations;
+    return locationList;
   },
 
   // Returns the map
@@ -138,9 +150,10 @@ var viewModel = {
 
   // Adds a picture to infoWindow of clicked marker
   addPic: function(searchStr) {
-    var locationArr = viewModel.getLocations();
+    var locationArr = locationList;
     for (var i = 0; i < locationArr.length; i++) {
-      if (locationArr[i].title == searchStr) {
+      if (locationArr[i].title === searchStr) {
+        console.log(i);
         viewModel.getMap().panTo(viewModel.getMarkers()[i].getPosition());
         viewModel.getMarkers()[i].setAnimation(google.maps.Animation.BOUNCE);
         fetch(`https://api.unsplash.com/search/photos?page=1&query=${searchStr}`, {
@@ -189,6 +202,8 @@ var viewModel = {
     model.lastMarker = marker;
   },
 };
+
+model.query.subscribe(viewModel.search);
 
 // One view part of the MVVM
 var mapView = {
@@ -247,12 +262,7 @@ var mapView = {
 
 // Another view part of MVVM
 var filterView = {
-  // Initializes the list of locations
   initList: function() {
-    for (i = 0; i < viewModel.getLocations().length; i++) {
-      document.getElementById("locations").innerHTML += viewModel.populateLocations(i);
-    }
-
     // Adds event listener to menu icon so when clicked it moves and shows/hides the menu
     $('#menuIcon').on('click', function() {
       if (document.getElementById('menu').style.visibility !== 'hidden') {
@@ -265,25 +275,7 @@ var filterView = {
         this.style.left = '4px';
       }
     });
-
-    // Adds picture to infoWindow
-    $('ul').on('click', function(e) {
-      viewModel.addPic(e.target.innerHTML);
-    });
-
-    // Filter functionality, hides items if no match to text, reshows if the search is found
-    $('#searchField').keyup(function() {
-      var searchStr = document.getElementById('searchField').value;
-      var locationArr = viewModel.getLocations();
-      for (var i = 0; i < locationArr.length; i++) {
-        if (locationArr[i].title.toUpperCase().includes(searchStr.toUpperCase()) == true) {
-          document.getElementById("locations").children[i].style.display = "";
-          viewModel.getMarkers()[i].setVisible(true);
-        } else {
-          document.getElementById("locations").children[i].style.display = "none";
-          viewModel.getMarkers()[i].setVisible(false);
-        }
-      }
-    });
   }
 };
+
+ko.applyBindings(model);

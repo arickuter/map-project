@@ -15,18 +15,25 @@
   <button style="font-size: 25px" class="fa" id='menuIcon'>&#xf0c9;</button>
   <div id="menu">
     <div id='filter'>
-      <input type="text" id='searchField'>
+      <input placeholder="Filter..." type="search" data-bind="value: query, valueUpdate: 'keyup'" autocomplete="off" id='searchField'>
       <button id='filterBtn'><i style="font-size: 15px" class="fa">&#xf0b0;</i>Filter</button>
     </div>
-    <ul id="locations">
-    </ul>
+
+    <ul data-bind="template: {name:'location', foreach: locations}" id='listLocations'></ul>
+    <script type="text/html" id="location">
+      <li data-bind="click: function (data) { viewModel.addPic(this.title, data) }">
+        <span data-bind="text: title"></span>
+      </li>
+    </script>
+
   </div>
   <div id="map"></div>
 
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-  <script src="js/app.js"></script>
   <script async src="https://maps.googleapis.com/maps/api/js?libraries=places,geometry,drawing&key=AIzaSyAIHh5e61Ow9muNz5-l_6LvbXhXP3t2Qjk&callback=viewModel.init" onerror="mapView.mapError()">
   </script>
+  <script type='text/javascript' src='js/knockout-3.4.2.js'></script>
+  <script src="js/app.js"></script>
 </body>
 
 </html>
